@@ -4,7 +4,7 @@ import tempfile
 from flask import Flask, request
 from telegram import Update, Bot
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-from google_auth import make_oauth_flow, save_credentials_for_user, create_event_for_user, load_credentials_for_user
+from google_auth import save_credentials_for_user, create_event_for_user, load_credentials_for_user
 from nlp_helpers import extract_datetime, extract_title, extract_location
 from pydub import AudioSegment
 
