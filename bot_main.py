@@ -25,13 +25,14 @@ async def event_description(update, context):
     await update.message.reply_text("📅 Nhập thời gian bắt đầu (VD: 01-10-2025 10:00):")
     return START
 
-def parse_datetime(date_str):
-    """Chuyển 'dd-mm-yyyy HH:MM' -> ISO format"""
-    try:
-        dt = datetime.strptime(date_str, "%d-%m-%Y %H:%M")
-        return dt.strftime("%Y-%m-%dT%H:%M:%S")
-    except ValueError:
-        return None
+def parse_datetime_user(date_str):
+    # hỗ trợ dd-mm-YYYY HH:MM hoặc dd/mm/YYYY HH:MM
+    for fmt in ("%d-%m-%Y %H:%M", "%d/%m/%Y %H:%M", "%Y-%m-%d %H:%M:%S"):
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            continue
+    return None
 
 async def event_start(update, context):
     start_str = update.message.text
@@ -47,27 +48,39 @@ async def event_start(update, context):
 
 async def event_end(update, context):
     end_str = update.message.text
-    end_time = parse_datetime(end_str)
+    end_dt = parse_datetime_user(end_str)
 
-    if not end_time:
-        await update.message.reply_text("❌ Sai định dạng! Vui lòng nhập lại (VD: 01-10-2025 11:00):")
+    if not end_dt:
+        await update.message.reply_text("❌ Sai định dạng! Vui lòng nhập lại (VD: 01-10-2025 11:00).")
         return END
 
-    context.user_data["end_time"] = end_time
+    start_dt = context.user_data.get("start_dt")
+    if not start_dt:
+        await update.message.reply_text("❌ Lỗi nội bộ: không tìm start time. Hãy thử /addevent lại.")
+        return ConversationHandler.END
+
+    if end_dt <= start_dt:
+        await update.message.reply_text("❌ Thời gian kết thúc phải lớn hơn thời gian bắt đầu. Vui lòng nhập lại.")
+        return END
+
+    # chuỗi ISO (không kèm offset) — google_auth sẽ dùng timeZone param
+    start_iso = start_dt.strftime("%Y-%m-%dT%H:%M:%S")
+    end_iso = end_dt.strftime("%Y-%m-%dT%H:%M:%S")
 
     try:
         link = create_event(
             context.user_data["summary"],
             context.user_data["description"],
-            context.user_data["start_time"],
-            context.user_data["end_time"],
+            start_iso,
+            end_iso,
+            calendar_id=context.user_data.get("calendar_id", "primary")
         )
         await update.message.reply_text(f"✅ Đã tạo sự kiện: {link}")
     except Exception as e:
-        await update.message.reply_text(f"❌ Lỗi: {str(e)}")
-
+        # show error detail to user (or summarized)
+        await update.message.reply_text(f"❌ Lỗi khi tạo event: {e}")
     return ConversationHandler.END
-
+    
 async def cancel(update, context):
     await update.message.reply_text("🚫 Hủy tạo sự kiện.")
     return ConversationHandler.END
