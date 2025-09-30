@@ -8,7 +8,7 @@ from google_auth import make_oauth_flow, save_credentials_for_user, create_event
 from nlp_helpers import extract_datetime, extract_title, extract_location
 from pydub import AudioSegment
 
-TOKEN = os.getenv("TELEGRAM_TOKEN") or os.getenv("TELEGRAM_BOT_TOKEN")
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 if not TOKEN:
     raise Exception("Set TELEGRAM_TOKEN or TELEGRAM_BOT_TOKEN environment variable")
 
