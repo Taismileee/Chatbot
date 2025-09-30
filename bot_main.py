@@ -18,7 +18,7 @@ async def add_event(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Lỗi: {e}")
 
 def main():
-    app = Application.builder().token("TELEGRAM_BOT_TOKEN").build()
+    app = Application.builder().token("8315891855:AAFxfIPxOsOMBViRcqJcEmPNJJFoyeNphlo").build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("addevent", add_event))
     app.run_polling()
