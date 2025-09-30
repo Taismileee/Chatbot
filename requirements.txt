@@ -1,0 +1,11 @@
+python-telegram-bot==20.6
+Flask==2.2.5
+google-auth
+google-auth-oauthlib
+google-api-python-client
+pytesseract
+pillow
+pydub
+dateparser
+underthesea
+vosk
